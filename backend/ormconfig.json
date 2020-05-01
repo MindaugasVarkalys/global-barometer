@@ -6,7 +6,7 @@
   "password": "root",
   "database": "global-barometer",
   "entities": [
-    "entity/**/*.ts"
+    "src/entity/**/*.ts"
   ],
   "synchronize": true
 }

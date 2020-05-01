@@ -4,7 +4,6 @@ import {createConnection} from "typeorm";
 import bodyParser from 'body-parser';
 import dataPointController from './controller/dataPoint';
 
-
 const bootstrap = async () => {
     await createConnection();
 
