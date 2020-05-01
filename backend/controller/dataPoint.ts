@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/', async (req: Request, res: Response) => {
     const dataPoint = Object.assign(new DataPoint(), req.body);
     await getRepository(DataPoint).save(dataPoint);
-    res.status(204).send();
+    res.status(200).send({});
 });
 
 export default router;
