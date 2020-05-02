@@ -11,8 +11,8 @@ const bootstrap = async () => {
     app.use(bodyParser.json());
     app.use('/data-points', dataPointController);
 
-    app.listen(3000, function () {
-        console.log('App is listening on port 3000!');
+    app.listen(5000, function () {
+        console.log('App is listening on port 5000!');
     });
 };
 bootstrap();

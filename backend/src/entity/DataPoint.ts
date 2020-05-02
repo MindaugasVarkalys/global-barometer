@@ -6,13 +6,13 @@ export class DataPoint {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column("double")
     pressure: number;
 
-    @Column()
+    @Column("double")
     latitude: number;
 
-    @Column()
+    @Column("double")
     longitude: number;
 
     @Column()
