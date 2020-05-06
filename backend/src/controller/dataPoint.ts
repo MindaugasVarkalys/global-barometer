@@ -18,7 +18,6 @@ router.get('/', async (req: Request, res: Response) => {
     }
     const timestamp: number = +req.query.timestamp;
     const result = await getCustomRepository(DataPointRepository).findGroupedByCoordinates(timestamp);
-    console.log(result);
     res.send(result);
 });
 

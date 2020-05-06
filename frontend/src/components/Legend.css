@@ -1,0 +1,15 @@
+.legend {
+    position: absolute;
+    z-index: 999;
+    bottom: 16px;
+    right: 16px;
+}
+
+.legend-gradient {
+    background: linear-gradient(90deg, rgb(0,0,255), rgb(255,0,0));
+    height: 16px;
+    width: 300px;
+    display: inline-block;
+    margin: 0 8px;
+}
+

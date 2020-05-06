@@ -1,0 +1,18 @@
+.slider-layout {
+    position: absolute;
+    top: 0;
+    background: rgba(0,0,0,0.3);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    padding: 32px;
+    display: flex;
+
+}
+
+.slider-range {
+    width: 400px;
+    margin: 0 16px;
+}
+
+

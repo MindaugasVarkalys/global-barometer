@@ -20,7 +20,9 @@ import com.google.android.gms.location.LocationServices
 import com.varkalys.barometer.api.Api
 import com.varkalys.barometer.api.entity.DataPoint
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var api: Api
     private var isActive = false
     private var lastLocation: Location? = null
+    private var lastSensorData: Double? = null;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,12 +44,13 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(permission.ACCESS_FINE_LOCATION), 1)
         } else {
             startListeningToData()
+            startDataSendLoop()
         }
     }
 
     private fun initRetrofit() {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.0.112:3000/")
+            .baseUrl("http://192.168.0.114:5000/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         api = retrofit.create(Api::class.java)
@@ -63,7 +67,7 @@ class MainActivity : AppCompatActivity() {
     private fun startListeningToData() {
         val locationProvider = LocationServices.getFusedLocationProviderClient(this)
         locationProvider.lastLocation.addOnSuccessListener { location -> lastLocation = location }
-        locationProvider.requestLocationUpdates(LocationRequest.create(), locationCallback, Looper.getMainLooper())
+        locationProvider.requestLocationUpdates(LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setFastestInterval(1).setInterval(1).setMaxWaitTime(1), locationCallback, Looper.getMainLooper())
 
         val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         val pressureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
@@ -78,28 +82,31 @@ class MainActivity : AppCompatActivity() {
 
     private val pressureCallback = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
-            if (lastLocation == null) {
-                return
-            }
-            val dataPoint = DataPoint(event.values[0].toDouble(), lastLocation!!.latitude, lastLocation!!.longitude, System.currentTimeMillis() / 1000)
-            sendData(dataPoint)
-            displayData(dataPoint)
+            lastSensorData = event.values[0].toDouble()
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         }
     }
 
-    private fun sendData(dataPoint: DataPoint) {
+    private fun startDataSendLoop() {
         GlobalScope.launch {
-            api.postDataPoint(dataPoint)
-            Log.e("SENT", "SENT")
+            while (true) {
+                delay(10000)
+                if (lastLocation == null || lastSensorData == null) {
+                    continue
+                }
+                val dataPoint = DataPoint(lastSensorData!!, lastLocation!!.latitude, lastLocation!!.longitude, System.currentTimeMillis() / 1000)
+                displayData(dataPoint)
+                api.postDataPoint(dataPoint)
+                Log.e("SENT", "SENT")
+            }
         }
     }
 
     private fun displayData(dataPoint: DataPoint) {
         if (isActive) {
-            textView.text = "Pressure: ${dataPoint.pressure}\nLocation: ${dataPoint.latitude}, ${dataPoint.longitude}"
+            GlobalScope.launch(Dispatchers.Main) { textView.text = "Pressure: ${dataPoint.pressure}\nLocation: ${dataPoint.latitude}, ${dataPoint.longitude}" }
         }
     }
 
